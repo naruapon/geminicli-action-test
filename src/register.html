@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 300px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .error {
+            color: red;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Create Account</h2>
+        <form id="registerForm" novalidate>
+            <input type="text" id="fullName" placeholder="Full Name" required>
+            <div id="nameError" class="error"></div>
+            <input type="email" id="email" placeholder="Email Address" required>
+            <div id="emailError" class="error"></div>
+            <input type="password" id="password" placeholder="Password" required minlength="8">
+            <div id="passwordError" class="error"></div>
+            <button type="submit">Sign Up</button>
+        </form>
+    </div>
+    <script>
+        const form = document.getElementById("registerForm");
+        const fullName = document.getElementById("fullName");
+        const email = document.getElementById("email");
+        const password = document.getElementById("password");
+        const nameError = document.getElementById("nameError");
+        const emailError = document.getElementById("emailError");
+        const passwordError = document.getElementById("passwordError");
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+            let valid = true;
+            nameError.textContent = "";
+            emailError.textContent = "";
+            passwordError.textContent = "";
+            if (fullName.value.trim() === "") {
+                nameError.textContent = "Full Name is required.";
+                valid = false;
+            }
+            if (email.value.trim() === "") {
+                emailError.textContent = "Email Address is required.";
+                valid = false;
+            } else if (!/^\S+@\S+\.\S+$/.test(email.value)) {
+                emailError.textContent = "Please enter a valid email address.";
+                valid = false;
+            }
+            if (password.value.length < 8) {
+                passwordError.textContent = "Password must be at least 8 characters long.";
+                valid = false;
+            }
+            if (valid) {
+                if (localStorage.getItem(email.value)) {
+                    emailError.textContent = "An account with this email already exists.";
+                } else {
+                    localStorage.setItem(email.value, JSON.stringify({
+                        fullName: fullName.value,
+                        password: password.value
+                    }));
+                    window.location.href = "login.html?registered=true";
+                }
+            }
+        });
+    </script>
+</body>
+</html>
