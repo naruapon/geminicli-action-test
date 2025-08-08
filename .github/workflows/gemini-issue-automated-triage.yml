@@ -45,6 +45,14 @@ jobs:
           app-id: '${{ vars.APP_ID }}'
           private-key: '${{ secrets.APP_PRIVATE_KEY }}'
 
+      - name: 'Debug Issue Variables'
+        run: |
+          echo "Issue Title: ${{ github.event.issue.title }}"
+          echo "Issue Number: ${{ github.event.issue.number || github.event.inputs.issue_number }}"
+          echo "--- Issue Body ---"
+          echo "${{ github.event.issue.body }}"
+          echo "--------------------"
+
       - name: 'Run Gemini AI Engineer'
         uses: './'
         id: 'gemini_ai_engineer'
