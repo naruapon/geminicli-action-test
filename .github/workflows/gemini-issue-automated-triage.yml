@@ -1,4 +1,9 @@
-name: '🏷️ Gemini Automated Issue Triage'
+name: '🏷️ Gemini Automatpermissions:
+  contents: 'write'
+  id-token: 'write'
+  issues: 'write'
+  statuses: 'write'
+  pull-requests: 'write'sue Triage'
 
 on:
   issues:
