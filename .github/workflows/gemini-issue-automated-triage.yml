@@ -45,23 +45,11 @@ jobs:
           app-id: '${{ vars.APP_ID }}'
           private-key: '${{ secrets.APP_PRIVATE_KEY }}'
 
-      - name: 'Debug Issue Variables'
-        run: |
-          echo "Issue Title: ${{ github.event.issue.title }}"
-          echo "Issue Number: ${{ github.event.issue.number || github.event.inputs.issue_number }}"
-          echo "--- Issue Body ---"
-          echo "${{ github.event.issue.body }}"
-          echo "--------------------"
-
       - name: 'Run Gemini AI Engineer'
         uses: './'
         id: 'gemini_ai_engineer'
         env:
           GITHUB_TOKEN: '${{ steps.generate_token.outputs.token || secrets.GITHUB_TOKEN }}'
-          ISSUE_TITLE: '${{ github.event.issue.title }}'
-          ISSUE_BODY: '${{ github.event.issue.body }}'
-          ISSUE_NUMBER: '${{ github.event.issue.number || github.event.inputs.issue_number }}'
-          REPOSITORY: '${{ github.repository }}'
         with:
           gemini_cli_version: '${{ vars.GEMINI_CLI_VERSION }}'
           gcp_workload_identity_provider: '${{ vars.GCP_WIF_PROVIDER }}'
@@ -87,22 +75,27 @@ jobs:
             }
           prompt: |-
             ## Role
-            You are an expert AI software engineer. Your task is to implement the feature requested in the GitHub issue and create a pull request.
+            You are an expert AI software engineer.
 
-            ## Steps
-            1.  **Analyze the Issue:** Review the issue title ("${ISSUE_TITLE}") and body ("${ISSUE_BODY}") to fully understand the requirements.
-            2.  **Plan Implementation:** Determine the necessary files and directories. For example, a login page might require `src/pages/login.html` and `src/styles/login.css`.
-            3.  **Create a New Branch:** Create a new branch for this feature. The branch name must be descriptive, like `feature/issue-${ISSUE_NUMBER}-login-page`. Use: `git checkout -b feature/issue-${ISSUE_NUMBER}-login-page`.
-            4.  **Write Code:** Use `mkdir -p` to create directories and `echo "..." > path/to/file.ext` to create and write code to files. Implement the feature as described in the issue.
-            5.  **Commit Your Work:** Add all new files (`git add .`) and commit them with a clear, conventional commit message (`git commit -m "feat: Implement feature for #${ISSUE_NUMBER}"`).
-            6.  **Push to Remote:** Push the new branch to the repository (`git push origin feature/issue-${ISSUE_NUMBER}-login-page`).
-            7.  **Create a Pull Request:** Use the `gh` command to create a pull request. The title should be clear, and the body should link to the original issue. Use: `gh pr create --title "feat: Implement Login Page (closes #${ISSUE_NUMBER})" --body "This PR implements the feature requested in #${ISSUE_NUMBER}."`
+            ## Task
+            Your task is to implement the feature requested in the GitHub issue detailed below and create a pull request. You must start working immediately.
 
-            ## Guidelines
-            -   Write clean, functional, and complete code.
-            -   Do not ask for clarification. Use the information provided in the issue.
-            -   Execute commands one by one and verify their success.
-            -   Reference all shell variables as "${VAR}" (with quotes and braces).
+            ## Issue Details
+            - **Issue Number:** ${{ github.event.issue.number || github.event.inputs.issue_number }}
+            - **Issue Title:** ${{ github.event.issue.title }}
+            - **Issue Body:**
+            """
+            ${{ github.event.issue.body }}
+            """
+
+            ## Instructions
+            1.  **Create a New Branch:** Based on the issue details, create a descriptive branch name like `feature/issue-${{ github.event.issue.number || github.event.inputs.issue_number }}-<short-description>`. Use `git checkout -b ...`.
+            2.  **Write Code:** Implement the feature using `mkdir -p` and `echo`.
+            3.  **Commit Your Work:** Commit the changes with a conventional commit message, e.g., `git commit -m "feat: Implement feature for #${{ github.event.issue.number || github.event.inputs.issue_number }}"`.
+            4.  **Push to Remote:** Push the new branch to the repository.
+            5.  **Create a Pull Request:** Use `gh pr create` to open a pull request, linking it to the issue. Use a title like `feat: Implement Login Page (closes #${{ github.event.issue.number || github.event.inputs.issue_number }})`.
+
+            Begin implementation now.
 
       - name: 'Post Failure Comment'
         if: |-
@@ -117,4 +110,3 @@ jobs:
               issue_number: '${{ github.event.issue.number || github.event.inputs.issue_number }}',
               body: 'The AI engineer encountered an error and could not complete the task. Please check the [action logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.'
             })
-
